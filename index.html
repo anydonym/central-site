@@ -2,8 +2,197 @@
 
 <html>
   <head>
+    <meta name="og:site_name"     content="anydonym's site">
+    <meta name="og:title"         content="Index">
+    <meta name="og:description"   content="Greetings. Check out my website for frivolous yet somewhat fascinating information on various stuff.">
+    <meta name="og:thumbnail"     content="https://cdn.discordapp.com/avatars/931878105453314048/08ee114319fbf06c31ac19a8af033b9a.png">
+
+    <script>
+      let style = async (elements) => {
+        let property_map = new Map([
+          ['bg',  'background'],
+          ['fg',  'color'],
+          ['ta',  'text-align'],
+          ['d',   'display'],
+          ['gtc', 'grid-template-columns'],
+          ['gac', 'grid-auto-columns'],
+          ['gtr', 'grid-template-rows'],
+          ['gar', 'grid-auto-rows'],
+          ['pos', 'position'],
+          ['h',   'height'],
+          ['mnh', 'min-height'],
+          ['mxh', 'max-height'],
+          ['w',   'width'],
+          ['mnh', 'min-width'],
+          ['mxw', 'max-width'],
+          ['p',   'padding'],
+          ['m',   'margin'],
+          ['jc',  'justify-content'],
+          ['td',  'text-decoration']
+        ]);
+
+        let value_map = new Map([
+          [
+            'text-align',
+            new Map([
+              ['c', 'center'],
+              ['l', 'left'],
+              ['r', 'right'],
+              ['j', 'justify']
+            ])
+          ],
+          [
+            'justify-content',
+            new Map([
+              ['c', 'center'],
+              ['l', 'left'],
+              ['r', 'right'],
+              ['j', 'justify']
+            ])
+          ]
+        ])
+
+        let append_style  = (css) =>
+              stylesheet.innerHTML.includes(css)
+              ? undefined
+              : stylesheet.innerHTML += css,
+            escape        = (class_name) => class_name
+              .split  ('')
+              .flatMap((character, index) =>
+                (/[A-Za-z\_\-]/.test(character) || (index != 0 && /[0-9]/.test(character)))
+                ? character
+                : '\\' + character
+              )
+              .join   (''),
+            split         = (input, delimiter) => {
+              let regex_content = delimiter instanceof RegExp
+                                ? delimiter.source
+                                : delimiter;
+
+              return input
+              .split  (new RegExp('(?=' + regex_content + ')'))
+              .flatMap((string) => string.split(new RegExp('(?<=' + regex_content + ')')));
+            };
+
+        let stylesheet = document.createElement('style');
+
+        elements.forEach((element) => {
+          element
+          .className
+          .split  ('!!!')[0]
+          .split  (/\s+|\n+/g)
+          .filter ((v) => v)
+          .forEach((class_name) => {
+            let css_code      = '',
+                css_classname = (element_cn, root_hover, subelement_name, subelement_hover) => '.'
+                  + escape(element_cn)
+                  + (root_hover                           ? ':hover '                             : ' ')
+                  + (subelement_name                      ? subelement_name.replaceAll('_', ' ')  : '')
+                  + (subelement_name && subelement_hover  ? ':hover'                              : '');
+
+            let splitted = class_name.split('=>'),
+                metadata, assignments;
+
+            if (splitted.length == 2) {
+              metadata = splitted[0];
+              assignments = splitted[1];
+            }
+            else if (splitted.length == 1)
+              assignments = splitted[0]
+            else
+              console.warn(
+                new Error('There may only be subclass and assignment parts (max(len) = 2), got length =', splitted.length, 'instead.')
+              );
+
+            // Parse the metadata first
+            let splitted_metadata = (metadata ?? '').split('/'),
+                parsed_metadata = {
+                  root_hover:       false,
+                  subelement_hover: false
+                },
+                parsed_subelement = '',
+                style_metadata, subelement_metadata;
+
+            if (splitted_metadata.length == 2) {
+              subelement_metadata = splitted_metadata[0];
+              style_metadata = splitted_metadata[1];
+            }
+            else if (splitted_metadata.length == 1)
+              style_metadata = splitted_metadata[0];
+
+            if (style_metadata) {
+              let style_metadata_array = split(style_metadata, /\:\:|\&\:/);
+
+              if (style_metadata_array.length % 2 == 0)
+                for (let i = 0 ; i <= style_metadata.length ; i += 2) {
+                  if (style_metadata_array[i] == 'hover')
+                    switch (style_metadata_array[i + 1]) {
+                      case '::':
+                        parsed_metadata.subelement_hover = true;
+                      case '&:':
+                        parsed_metadata.root_hover = true;
+                    }
+                }
+              else
+                console.warn(
+                  new Error('Style metadata array length must be even, got', style_metadata_array.length, 'instead.')
+                );
+            }
+
+            if (subelement_metadata)
+              parsed_subelement = subelement_metadata;
+
+            css_code = css_classname(class_name, parsed_metadata.root_hover, parsed_subelement, parsed_metadata.subelement_hover);
+
+            // Parse declaration
+            let declaration = assignments
+            .split  ('&')
+            .flatMap((assignment) => {
+              let splitted_assignment = assignment.split(':');
+              let property            = property_map.get(splitted_assignment[0])
+                                      ?? splitted_assignment[0];
+              let pv_map              = value_map.get(property);
+              let value               = pv_map
+                                      ? (
+                                          pv_map.get(splitted_assignment[1])
+                                          ?? splitted_assignment[1]
+                                        )
+                                      : splitted_assignment[1].replaceAll('_', ' ');
+
+              return property + ':' + value + ';';
+            }).join('');
+
+            append_style(css_code + '{' + declaration + '}');
+          });
+        });
+
+        document.head.appendChild(stylesheet);
+      }
+    </script>
   </head>
 
-  <body>
+  <body class="m:0 */=>m:0 bg:hsl(210,83%,12%) fg:#b1defa" onload="style([document.body, ...document.body.querySelectorAll('*')]);">
+    <header class="d:grid gtc:1fr_64px_1fr bg:hsl(198,72%,50%) pos:sticky h:64px .subflex/=>d:flex&jc:c .subflex_a/=>width:100%&p:10px_0&ta:c&m:auto&td:none&fg:#edef16">
+      <div class="!!! subflex">
+
+      </div>
+      
+      <div>
+        <img class="h:64px" src="https://cdn.discordapp.com/avatars/931878105453314048/08ee114319fbf06c31ac19a8af033b9a.png">
+      </div>
+      
+      <div class="!!! subflex">
+        <a href="https://github.com/anydonym">GitHub</a>
+        <a href="https://discord.gg/rvHScfaDnt">Discord</a>
+      </div>
+    </header>
+
+    <main>
+      Hello, world!
+    </main>
+
+    <footer>
+
+    </footer>
   </body>
 </html>
