@@ -2,11 +2,14 @@
 
 <html>
   <head>
+    <title>Index</title>
+
     <meta name="og:site_name"     content="anydonym's site">
     <meta name="og:title"         content="Index">
     <meta name="og:description"   content="Greetings. Check out my website for frivolous yet somewhat fascinating information on various stuff.">
     <meta name="og:thumbnail"     content="https://cdn.discordapp.com/avatars/931878105453314048/08ee114319fbf06c31ac19a8af033b9a.png">
 
+    <!-- stylescript -->
     <script>
       let style = async (elements) => {
         let property_map = new Map([
@@ -28,7 +31,10 @@
           ['p',   'padding'],
           ['m',   'margin'],
           ['jc',  'justify-content'],
-          ['td',  'text-decoration']
+          ['td',  'text-decoration'],
+          ['f',   'font'],
+          ['ff',  'font-family'],
+          ['fw',  'font-weight']
         ]);
 
         let value_map = new Map([
@@ -74,7 +80,8 @@
               .flatMap((string) => string.split(new RegExp('(?<=' + regex_content + ')')));
             };
 
-        let stylesheet = document.createElement('style');
+        let stylesheet  = document.createElement('style'),
+            classstyles = new Map();
 
         elements.forEach((element) => {
           element
@@ -169,12 +176,19 @@
         document.head.appendChild(stylesheet);
       }
     </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Noto+Sans+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
 
-  <body class="m:0 */=>m:0 bg:hsl(210,83%,12%) fg:#b1defa" onload="style([document.body, ...document.body.querySelectorAll('*')]);">
-    <header class="d:grid gtc:1fr_64px_1fr bg:hsl(198,72%,50%) pos:sticky h:64px .subflex/=>d:flex&jc:c .subflex_a/=>width:100%&p:10px_0&ta:c&m:auto&td:none&fg:#edef16">
+  <body class="--font-display:Noto_Sans_Display,Lucida_Sans_Unicode,sans-serif m:0 */=>m:0 bg:hsl(228,65%,13%) fg:hsl(197,90%,91%) ff:Lucida_Sans_Unicode,Lucida_Grande,sans-serif .mono/=>ff:Noto_Sans_Mono,Consolas,monospace" onload="style([document.body, ...document.body.querySelectorAll('*')]);">
+    <header class="d:grid gtc:1fr_64px_1fr bg:hsl(198,72%,50%) pos:sticky fw:600 h:64px .subflex/=>d:flex&jc:c .subflex_a/=>width:100%&p:10px_0&ta:c&m:auto&td:none&fg:#edef16 ff:var(--font-display) fw:600">
       <div class="!!! subflex">
-
+        <a href="/main">Main Index</a>
+        <a href="/dinocord">dinocord</a>
       </div>
       
       <div>
@@ -183,12 +197,85 @@
       
       <div class="!!! subflex">
         <a href="https://github.com/anydonym">GitHub</a>
-        <a href="https://discord.gg/rvHScfaDnt">Discord</a>
       </div>
     </header>
 
-    <main>
-      Hello, world!
+    <main class="div/=>p:10px_5% h1/=>ff:var(--font-display)&fw:400">
+      <div id="introduction" class="bg:hsl(212,89%,20%) padding-top:3%!important padding-bottom:3%!important ta:c">
+        <script>
+          fetch('https://raw.githubusercontent.com/anydonym/anydonym/main/README.md').then((res) => res.text()).then((md) => {
+            document.getElementById('introduction-content').innerHTML = marked.parse(md.split(/\n+/g).slice(0, 2).join('\n'));
+          });
+        </script>
+
+        <p id="introduction-content" class="h1/=>ff:var(--font-display)&fw:400"></p>
+      </div>
+
+      <div id="projects">
+        <h1 class="ta:c !!! display">Current Projects</h1>
+
+        <script>
+          fetch('https://api.github.com/users/anydonym/starred').then((res) => res.json()).then((
+            /**
+             * @type {Array<{
+                id: number,
+                node_id: string,
+                name: string,
+                full_name: string,
+                private: boolean,
+
+                owner: {
+                  login: string,
+                  id: number,
+                  node_id: string,
+                  type: string,
+                  site_admin: boolean
+                },
+
+                html_url: string,
+                description: string,
+                fork: boolean,
+                url: string,
+
+                created_at: string,
+                updated_at: string,
+                pushed_at: string,
+                git_url: string,
+                ssh_url; string,
+                clone_url: string,
+                svn_url: string,
+                homepage: string | null,
+                size: number,
+                stargazers_count: number,
+                watchers_count: number,
+                language: string,
+
+                license: {
+                  key: string,
+                  name: string,
+                  spdx_id: string,
+                  url: string | null,
+                  node_id: string
+                },
+
+                allow_forking: boolean,
+                is_template: boolean,
+                topics: string[],
+                visibility: string,
+                forks: number,
+                open_issues: number,
+                watchers: number,
+                default_branch: string
+              }>}
+             */
+            json
+          ) => {
+            json.filter((repo) => repo.owner.login == 'anydonym').forEach((repo) => {
+              console.log(repo)
+            });
+          });
+        </script>
+      </div>
     </main>
 
     <footer>
